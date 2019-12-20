@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script>
+function test123()
+{
+	let table = document.getElementById("TABLE");
+	let rows = table.rows;
+	let row = table.insertRow();
+	row.innerHTML= '<tr><td>ziggy 1</td><td>ziggy  2</td></tr>';
+	row.dataset.ziggy='ZIGGYPIGGY';
+	alert(row.dataset.ziggy);
+	//alert(idiot.dataset.rowData);
+	//alert(idiot.dataset.rowData);
+}
+</script>
+
+<script src="file://C:/temp/test.js" ></script>
+<button onclick="test456('Klik!')">Click me</button>
+
+<table id="TABLE">
+<tr><th>Head 1</th><th>Head 2</th></tr>
+<tr id = "IDIOT" data-row-data="ROWDATA"><td>Data 1</td><td>Data 2</td></tr>
+</table>
+
+<p><b>Note:</b> When a user clicks on a radio-button, it becomes checked, and all other radio-buttons with equal name become unchecked.</p>
+
+</body>
+</html>
