@@ -4,6 +4,7 @@ import requests
 import argparse
 import socket
 
+FAVICONREQUEST = "/favicon.ico"
 PORT = 65432
 def parseArguments(defaultPort):
     parser = argparse.ArgumentParser(description='simple port forwardert')
@@ -19,40 +20,27 @@ class clientServerInfo(object):
 class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
     knownClientServers = []
     CurrentClientIndex = 0
-    recursive = False
     def selectClientServer(self):
         index = ForwardingHandler.CurrentClientIndex
         ForwardingHandler.CurrentClientIndex = (ForwardingHandler.CurrentClientIndex + 1) % len(ForwardingHandler.knownClientServers)        
         return ForwardingHandler.knownClientServers[index]
     def getResponseFromServer(self):
         client = self.selectClientServer()
-        print('get response from {}:{}'.format(client.host,client.port))
         return requests.get('http://{}:{}'.format(client.host, client.port))
     def sendResponse(self, response):
-        print("sending response (status): {}".format(response.status_code))
         self.send_response(response.status_code)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(response.text))
         self.end_headers()
         self.wfile.write(str.encode(response.text))     
     def do_GET(self):     
-        if ForwardingHandler.recursive:
-            print ("recur")
-            return
-        if self.path=="/favicon.ico":
-            print("favicon, ignoring")
+        if self.path==FAVICONREQUEST:
             self.send_response(404)
             return
         ForwardingHandler.recursive = True
-        print("get response")
         response = self.getResponseFromServer()
-        print("next")
         if response:
-            print("send response")
             self.sendResponse(response)
-            print("end send")
-            ForwardingHandler.recursive = False
-        print("end get")
 
 class PortForwarder(object):
     def __init__(self, host, port):
