@@ -22,27 +22,37 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
     recursive = False
     def selectClientServer(self):
         index = ForwardingHandler.CurrentClientIndex
-        if not ForwardingHandler.recursive:
-            ForwardingHandler.CurrentClientIndex = (ForwardingHandler.CurrentClientIndex + 1) % len(ForwardingHandler.knownClientServers)
-            ForwardingHandler.recursive = True            
+        ForwardingHandler.CurrentClientIndex = (ForwardingHandler.CurrentClientIndex + 1) % len(ForwardingHandler.knownClientServers)        
         return ForwardingHandler.knownClientServers[index]
     def getResponseFromServer(self):
         client = self.selectClientServer()
         print('get response from {}:{}'.format(client.host,client.port))
         return requests.get('http://{}:{}'.format(client.host, client.port))
     def sendResponse(self, response):
+        print("sending response (status): {}".format(response.status_code))
         self.send_response(response.status_code)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(response.text))
         self.end_headers()
         self.wfile.write(str.encode(response.text))     
-    def do_GET(self):        
+    def do_GET(self):     
         if ForwardingHandler.recursive:
+            print ("recur")
             return
+        if self.path=="/favicon.ico":
+            print("favicon, ignoring")
+            self.send_response(404)
+            return
+        ForwardingHandler.recursive = True
+        print("get response")
         response = self.getResponseFromServer()
+        print("next")
         if response:
+            print("send response")
             self.sendResponse(response)
-        ForwardingHandler.recursive = False
+            print("end send")
+            ForwardingHandler.recursive = False
+        print("end get")
 
 class PortForwarder(object):
     def __init__(self, host, port):
