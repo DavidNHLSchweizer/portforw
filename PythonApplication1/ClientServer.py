@@ -1,3 +1,4 @@
+@@ -1,55 +0,0 @@
 import requests
 import http.server
 import socketserver
@@ -52,4 +53,3 @@ ServerHandler.port = args.p
 with socketserver.TCPServer(("", ServerHandler.port), ServerHandler) as httpd:
     print('serving as "{}" at port {} with color {}'.format(ServerHandler.message, ServerHandler.port, ServerHandler.color))
     httpd.serve_forever()
-
