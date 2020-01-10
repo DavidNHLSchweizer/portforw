@@ -3,6 +3,9 @@ import http.server
 import requests
 import argparse
 import socket
+import config
+import os
+import sys
 
 def isFAVICONRequest(requestPath):
     FAVICONREQUEST = "/favicon.ico"
@@ -42,7 +45,7 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(str.encode(response.text))     
 
     def do_GET(self):     
-        if isFAVICONRequest(self.path)
+        if isFAVICONRequest(self.path):
             self.send_response(HTTPNOTFOUND)
             return
         response = self.getResponseFromClientServer()
@@ -51,22 +54,28 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
 
 class PortForwarder(object):
     def __init__(self, host, port):
-        self.server = socketserver.TCPServer((host, port), ForwardingHandler)
-        print("serving at port", port)
+        self.port = port
+        self.server = socketserver.TCPServer((host, port), ForwardingHandler)      
 
     def addClientServer(self, host, port):
         ForwardingHandler.knownClientServers.append(clientServerInfo(host,port))
-        
+
     def run(self):
+        self.printPorts()
+        self.server.serve_forever()
+
+    def printPorts(self):
+        print("serving at port", self.port)
         for i in range(len(ForwardingHandler.knownClientServers)):
             client = ForwardingHandler.knownClientServers[i]
             print('server index: {} port: {}.'.format(i, client.port))
-        self.server.serve_forever()
+
+    def readConfigurationFile(self,filename):
+        ports = config.readConfigurationFile(filename)
+        for port in ports:
+            self.addClientServer('127.0.0.1', port)
 
 port = parseArguments(DEFAULTPORT)
 PF = PortForwarder('127.0.0.1', port)
-PF.addClientServer('127.0.0.1', 8000)
-PF.addClientServer('127.0.0.1', 8001)
-PF.addClientServer('127.0.0.1', 8002)
-PF.addClientServer('127.0.0.1', 8003)
+PF.readConfigurationFile(os.path.join(sys.path[0], 'config.txt'))
 PF.run()
