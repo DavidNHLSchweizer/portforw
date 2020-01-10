@@ -33,9 +33,9 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
         ForwardingHandler.NextClientIndex = (ForwardingHandler.NextClientIndex + 1) % len(ForwardingHandler.knownClientServers)
         return ForwardingHandler.knownClientServers[index]
 
-    def getResponseFromClientServer(self):
+    def getResponseFromClientServer(self, requestPath):
         client = self.getNextClientServerInfo()
-        return requests.get('http://{}:{}'.format(client.host, client.port))
+        return requests.get('http://{}:{}{}'.format(client.host, client.port, requestPath))
 
     def sendResponse(self, response):
         self.send_response(response.status_code)
@@ -48,7 +48,7 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
         if isFAVICONRequest(self.path):
             self.send_response(HTTPNOTFOUND)
             return
-        response = self.getResponseFromClientServer()
+        response = self.getResponseFromClientServer(self.path)
         if response:
             self.sendResponse(response)
 

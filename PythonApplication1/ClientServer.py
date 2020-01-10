@@ -25,24 +25,52 @@ SIMPLE_SITE = """
 <p>{}</p>
 <b>
 <p>port: {}</p>
+<b>
+<p> <a href="./link1"> link </a> </p>
 
 </body>
 </html>
 """
 
+SIMPLE_SITE_LINK1 = """
+<html>
+<head>
+<title>Python Test (link 1)</title>
+</head>
+<body style = "background-color:{};">
+<h1>Wonderful Link!</h1>
+<p>{}</p>
+<b>
+<p>port: {}</p>
+
+</body>
+</html>
+"""
+
+
 class ServerHandler(http.server.SimpleHTTPRequestHandler):
     color = COLOR
     message= MESSAGE
     port = PORT
-    def sendResponse(self):
-        htmlString = SIMPLE_SITE.format(ServerHandler.color,ServerHandler.message, ServerHandler.port)
+
+    def getHTMLPage(self, path):
+        if path=="/":
+            return SIMPLE_SITE.format(ServerHandler.color,ServerHandler.message, ServerHandler.port)
+        elif path=="/link1":
+            return SIMPLE_SITE_LINK1.format(ServerHandler.color,ServerHandler.message, ServerHandler.port)
+        else:
+            return ""
+
+    def sendResponse(self, path):
+        htmlString = self.getHTMLPage(path)
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(htmlString))
         self.end_headers()
         self.wfile.write(str.encode(htmlString))        
-    def do_GET(self):        
-        self.sendResponse()
+    def do_GET(self):   
+        print(self.path)
+        self.sendResponse(self.path)
 
 args = parseArguments(PORT, COLOR)
 ServerHandler.color = args.c
