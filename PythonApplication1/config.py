@@ -7,6 +7,8 @@ def parseLine(line):
     match = pattern.match(line)
     if match:
         return match.group('port')
+    else:
+        return None
 
 def readConfigurationFile(filename):        
     results = []
