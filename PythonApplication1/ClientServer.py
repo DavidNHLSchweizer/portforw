@@ -63,6 +63,9 @@ class ServerHandler(http.server.SimpleHTTPRequestHandler):
 
     def sendResponse(self, path):
         htmlString = self.getHTMLPage(path)
+        if htmlString == "":
+            self.send_response(404)
+            return
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-length", len(htmlString))

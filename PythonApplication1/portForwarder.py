@@ -35,6 +35,7 @@ class ForwardingHandler(http.server.SimpleHTTPRequestHandler):
 
     def getResponseFromClientServer(self, requestPath):
         client = self.getNextClientServerInfo()
+        print("forwarding {} to {}:{}".format(requestPath, client.host, client.port))
         return requests.get('http://{}:{}{}'.format(client.host, client.port, requestPath))
 
     def sendResponse(self, response):
